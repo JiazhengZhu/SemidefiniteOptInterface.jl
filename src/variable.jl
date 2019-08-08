@@ -19,18 +19,18 @@ function _constraintvariable!(m::SOItoMOIBridge{T}, vs::VIS, s::ZS) where T
     end
     blk
 end
-vscaling(::Type{<:NS}) = 1.
-vscaling(::Type{<:PS}) = -1.
+vscaling(::Type{<:NS}, T) = one(T)
+vscaling(::Type{<:PS}, T) = -1 * one(T)
 _length(vi::VI) = 1
 _length(vi::Vector{VI}) = length(vi)
 _enumerate(vi::VI) = enumerate((vi,))
 _enumerate(vi::Vector{VI}) = enumerate(vi)
-function _constraintvariable!(m::SOItoMOIBridge, vs::VIS, s::S) where S<:Union{NS, PS}
+function _constraintvariable!(m::SOItoMOIBridge{T}, vs::VIS, s::S) where {S<:Union{NS, PS}, T}
     blk = newblock(m, -_length(vs))
     cst = _getconstant(m, s)
     m.blkconstant[blk] = cst
     for (i, v) in _enumerate(vs)
-        setvarmap!(m, v, (blk, i, i, vscaling(S), cst))
+        setvarmap!(m, v, (blk, i, i, vscaling(S, T), cst))
         unfree(m, v)
     end
     blk
